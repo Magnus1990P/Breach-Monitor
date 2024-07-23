@@ -1,3 +1,5 @@
 requests
 msal
 click
+pandas
+openpyxl
