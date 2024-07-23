@@ -268,12 +268,12 @@ def create_ticket(email:str="", breaches:dict={}, new_findings:dict={}, old_find
 
 @click.command()
 @click.option('-d', '--directory', default="/tmp/data", help="Path of data directory")
-@click.option('--fresh-domain', default="", help="Domain for ticketing systems endpoint")
+@click.option('--fresh-domain', default="", help="FQDN of ticketing system endpoint")
 @click.option('--passphrase', default="", help="Passphrase for private key")
 @click.option('--hibp-key', default="", help="API key for HIBP")
 @click.option('--fresh-key', default="", help="API key for FreshService instance")
-@click.option('-q', '--quiet', default=False, is_flag=True, help="API key for FreshService instance")
-@click.option('-f', '--force', default=False, is_flag=True, help="Ignore las scan timed, forcing a lookup")
+@click.option('-q', '--quiet', default=False, is_flag=True, help="Skip ticket generation")
+@click.option('-f', '--force', default=False, is_flag=True, help="Force lookup, ignoring last scanned time")
 def main(directory:str="/tmp/data", hibp_key:str="", passphrase:str="", fresh_key:str=None, quiet:bool=False, force:bool=False, fresh_domain:str=""):
     global base_directory, hibp_headers, fresh_header
     base_directory = directory
