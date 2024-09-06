@@ -3,6 +3,8 @@ data/*.pem
 data/*.json
 data/emails/*.txt
 
+live_data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

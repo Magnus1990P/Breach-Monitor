@@ -1,0 +1,12 @@
+services:
+  breachmonitor:
+    container_name: "breachmonitor"
+    image: breachmonitor:latest
+    build: .
+    volumes:
+      - ./live_data:/data
+    environment:
+      FRESHDOMAIN: ${FRESHDOMAIN}
+      FRESH_KEY: ${FRESH_KEY}
+      HIBP_KEY: ${HIBP_KEY}
+      MS365_CERT_PASSPHRASE: ${MS365_CERT_PASSPHRASE}
