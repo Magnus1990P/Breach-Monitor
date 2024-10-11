@@ -299,24 +299,24 @@ def main(directory:str="/tmp/data", hibp_key:str="", passphrase:str="", fresh_ke
             logger.critical("No API key for Freshservice found")
             exit(1)
 
-    try:
-        key = getenv("MS365_CERT_PASSPHRASE") if not passphrase else passphrase
-        if not key:
-            raise KeyError
-    except:
-        logger.critical("No API key for HIBP found")
-        exit(1)
+    #try:
+    #    key = getenv("MS365_CERT_PASSPHRASE") if not passphrase else passphrase
+    #    if not key:
+    #        raise KeyError
+    #except:
+    #    logger.critical("No MS365 cert passphrase found")
+    #    exit(1)
     
     monitored_emails = load_json()
     monitored_emails = load_emails_from_file(email_list=monitored_emails)
 
     breach_information = load_breach_info(monitored_emails=monitored_emails)
 
-    temp_emails = ms365_connect(passphrase=passphrase) if passphrase else ms365_connect()
-    for email in temp_emails:
-        if email not in monitored_emails:
-            logger.info(f"New email: {email}")
-            monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
+    #temp_emails = ms365_connect(passphrase=passphrase) if passphrase else ms365_connect()
+    #for email in temp_emails:
+    #    if email not in monitored_emails:
+    #        logger.info(f"New email: {email}")
+    #        monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
     
     save_data(monitored_emails, filename=".runtime-monitored_emails.json")
     save_data(breach_information, filename=".runtime-breach_information.json")
