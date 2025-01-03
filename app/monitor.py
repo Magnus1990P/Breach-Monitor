@@ -177,7 +177,7 @@ def load_emails_from_file(path:str="emails", email_list:dict={}):
     return email_list
 
 
-def msal_certificate_auth(clientID, tenantID, certfile:str="cert.pem", privKey:str="key.pem", passphrase:str="", thumbprint:str=""):
+def msal_certificate_auth(clientID, tenantID, certfile:str="cert.pem", privKey:str="key.pem", cert_passphrase:str="", thumbprint:str=""):
     authority = f"https://login.microsoftonline.com/{tenantID}"
     app = msal.ConfidentialClientApplication(clientID,
                                              authority=authority, 
@@ -185,7 +185,7 @@ def msal_certificate_auth(clientID, tenantID, certfile:str="cert.pem", privKey:s
                                                 "thumbprint": thumbprint.replace(":", "").strip(), 
                                                 "private_key": open(f"{base_directory}/{privKey}").read(),
                                                 "public_certificate": open(f"{base_directory}/{certfile}").read(),
-                                                "passphrase": getenv("MS365_CERT_PASSPHRASE") if not passphrase else passphrase
+                                                "passphrase": getenv("MS365_CERT_PASSPHRASE") if not cert_passphrase else cert_passphrase
                                             })
     result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     return result
@@ -267,18 +267,24 @@ def create_ticket(email:str="", breaches:dict={}, new_findings:dict={}, old_find
 
 
 @click.command()
-@click.option('-d', '--directory', default="/tmp/data", help="Path of data directory")
-@click.option('--fresh-domain', default="", help="FQDN of ticketing system endpoint")
-@click.option('--passphrase', default="", help="Passphrase for private key")
-@click.option('--hibp-key', default="", help="API key for HIBP")
-@click.option('--fresh-key', default="", help="API key for FreshService instance")
 @click.option('-q', '--quiet', default=False, is_flag=True, help="Skip ticket generation")
 @click.option('-f', '--force', default=False, is_flag=True, help="Force lookup, ignoring last scanned time")
-def main(directory:str="/tmp/data", hibp_key:str="", passphrase:str="", fresh_key:str=None, quiet:bool=False, force:bool=False, fresh_domain:str=""):
+@click.option('-d', '--directory', default="/tmp/data", help="Path of data directory")
+@click.option('--ms365-passphrase', default="", help="Passphrase for private key")
+@click.option('--hibp-key', default="", help="API key for HIBP")
+@click.option('--fresh-domain', default="", help="FQDN of ticketing system endpoint")
+@click.option('--fresh-key', default="", help="API key for FreshService instance")
+@click.option('-Fd', '--filtered-domains', default="", help="Scan only the domains listed, separated by comma")
+def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
+         hibp_key:str="", ms365_passphrase:str="",
+         fresh_domain:str="", fresh_key:str=None,
+         filtered_domains:str=""):
     global base_directory, hibp_headers, fresh_header
     base_directory = directory
     setup_logging()
     logging.basicConfig(level="INFO")
+
+    filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
 
     try:
         key = getenv("HIBP_KEY") if not hibp_key else hibp_key
@@ -298,26 +304,24 @@ def main(directory:str="/tmp/data", hibp_key:str="", passphrase:str="", fresh_ke
         except:
             logger.critical("No API key for Freshservice found")
             exit(1)
-
-    #try:
-    #    key = getenv("MS365_CERT_PASSPHRASE") if not passphrase else passphrase
-    #    if not key:
-    #        raise KeyError
-    #except:
-    #    logger.critical("No MS365 cert passphrase found")
-    #    exit(1)
+    
+    try:
+        key = getenv("MS365_CERT_PASSPHRASE") if not ms365_passphrase else ms365_passphrase
+    except:
+        logger.critical("No MS365 cert passphrase found")
     
     monitored_emails = load_json()
     monitored_emails = load_emails_from_file(email_list=monitored_emails)
 
+    if key:
+        temp_emails = ms365_connect(passphrase=ms365_passphrase) if ms365_passphrase else ms365_connect()
+    for email in temp_emails:
+        if email not in monitored_emails:
+            logger.info(f"New email: {email}")
+            monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
+    
     breach_information = load_breach_info(monitored_emails=monitored_emails)
 
-    #temp_emails = ms365_connect(passphrase=passphrase) if passphrase else ms365_connect()
-    #for email in temp_emails:
-    #    if email not in monitored_emails:
-    #        logger.info(f"New email: {email}")
-    #        monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
-    
     save_data(monitored_emails, filename=".runtime-monitored_emails.json")
     save_data(breach_information, filename=".runtime-breach_information.json")
 
@@ -327,6 +331,9 @@ def main(directory:str="/tmp/data", hibp_key:str="", passphrase:str="", fresh_ke
         notification = False
         processed_emails += 1
         
+        if email[email.rfind("@"):] not in filtered_domains:
+            continue
+
         if (processed_emails%autosave_threshold) == 0:
             logger.info(f"Status - Processed {processed_emails}/{len(monitored_emails)} emails")
         
