@@ -315,10 +315,10 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
 
     if key:
         temp_emails = ms365_connect(passphrase=ms365_passphrase) if ms365_passphrase else ms365_connect()
-    for email in temp_emails:
-        if email not in monitored_emails:
-            logger.info(f"New email: {email}")
-            monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
+        for email in temp_emails:
+            if email not in monitored_emails:
+                logger.info(f"New email: {email}")
+                monitored_emails.update({email:{"last_scanned": 1, "breaches": []}})
     
     breach_information = load_breach_info(monitored_emails=monitored_emails)
 
@@ -331,8 +331,10 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
         notification = False
         processed_emails += 1
         
-        if email[email.rfind("@"):] not in filtered_domains:
+        if email[email.rfind("@")+1:] not in filtered_domains:
+            logger.debug(f"Skip: {email}")
             continue
+        logger.debug(f"Processing: {email}")
 
         if (processed_emails%autosave_threshold) == 0:
             logger.info(f"Status - Processed {processed_emails}/{len(monitored_emails)} emails")
