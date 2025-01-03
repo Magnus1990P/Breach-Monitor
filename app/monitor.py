@@ -237,8 +237,8 @@ def create_table(breaches, findings):
             <td>{breaches[key]['BreachDate']}</td>
             <td>{breaches[key]['Domain']}</td>
             <td>{'Ja' if breaches[key]['KIT_NOTIFICATION'] else 'Nei'}</td>
-            <td>{", ".join(dc for dc in breaches[key]['DataClasses'] if dc in user_info_tags)}</td>
-            <td>{", ".join(dc for dc in breaches[key]['DataClasses'] if dc in credential_tags)}</td>
+            <td>{", ".join(dc for dc in breaches[key]['DataClasses'])}</td>
+            <td>{", ".join(dc for dc in breaches[key]['DataClasses'])}</td>
             <td>{breaches[key]['Description']}</td></tr>
         """
         html += html_row
