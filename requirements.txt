@@ -3,3 +3,4 @@ msal
 click
 pandas
 openpyxl
+matplotlib

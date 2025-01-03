@@ -2,8 +2,10 @@
 data/*.pem
 data/*.json
 data/emails/*.txt
+temp_notice.html
 
 live_data
+*.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
