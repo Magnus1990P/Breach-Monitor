@@ -285,6 +285,7 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
     logging.basicConfig(level="INFO")
 
     filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
+    logger.info(f"Filtered applied: {','.join(filtered_domains)}")
 
     try:
         key = getenv("HIBP_KEY") if not hibp_key else hibp_key
