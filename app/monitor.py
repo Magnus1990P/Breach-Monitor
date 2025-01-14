@@ -285,7 +285,7 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
     logging.basicConfig(level="INFO")
 
     filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
-    logger.info(f"Filtered applied: {','.join(filtered_domains)}")
+    logger.info(f"Filter applied: {','.join(filtered_domains)}")
 
     try:
         key = getenv("HIBP_KEY") if not hibp_key else hibp_key
@@ -332,11 +332,6 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
         notification = False
         processed_emails += 1
         
-        if email[email.rfind("@")+1:] not in filtered_domains:
-            logger.debug(f"Skip: {email}")
-            continue
-        logger.debug(f"Processing: {email}")
-
         if (processed_emails%autosave_threshold) == 0:
             logger.info(f"Status - Processed {processed_emails}/{len(monitored_emails)} emails")
         
@@ -344,6 +339,13 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
             logger.debug(f"Skipping - {email} - Time remaining {monitored_emails[email]['last_scanned']-scan_time_threshold}s")
             continue
         
+        if filtered_domains:
+            if email[email.rfind("@")+1:] not in filtered_domains:
+                logger.debug(f"Skip: {email}")
+                continue
+            else:
+                logger.info(f"Processing: {email}")
+
         data = fetch_account(email)
         if data:
             new_breaches = [breach["Name"] for breach in data if breach["Name"] not in monitored_emails[email]["breaches"]]
