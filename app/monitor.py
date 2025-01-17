@@ -284,7 +284,10 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
     setup_logging()
     logging.basicConfig(level="INFO")
 
-    filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
+    if not filtered_domains:
+        filtered_domains = []
+    else:
+        filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
     logger.info(f"Filter applied: {','.join(filtered_domains)}")
 
     try:
