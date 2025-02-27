@@ -1,0 +1,17 @@
+Avatars
+Bank account numbers
+Cryptocurrency wallet addresses
+Email addresses
+Government issued IDs
+IMEI numbers
+IMSI numbers
+Instant messenger identities
+Job titles
+Licence plates
+Names
+Passport numbers
+Phone numbers
+Physical addresses
+Profile photos
+Social media profiles
+Usernames

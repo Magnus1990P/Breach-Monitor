@@ -1,0 +1,13 @@
+Auth tokens
+Bank account numbers
+Credit status information
+Email messages
+Government issued IDs
+IMEI numbers
+IMSI numbers
+Passport numbers
+Password hints
+Passwords
+Private messages
+Security questions and answers
+Survey results

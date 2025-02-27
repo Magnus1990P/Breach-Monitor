@@ -22,8 +22,8 @@ scan_time = datetime.now().timestamp()
 hibp_url = "https://haveibeenpwned.com/api/v3"
 hibp_headers = {"hibp-api-key": None}
 autosave_threshold = 25
-user_info_tags = ["Email addresses", "Names", "Usernames", "Phone numbers", "Social media profiles"]
-credential_tags = ["Passwords", "Auth tokens", "Password hints", "Email messages", "Survey results", "Website activity"]
+user_info_tags = []
+confidential_tags = []
 fresh_header = {
     "Content-Type": "application/json",
     "authorization": None
@@ -104,7 +104,7 @@ def fetch_breach_info(breach):
     for tag in user_info_tags:
         if tag not in data["DataClasses"]:
             continue
-        for subtag in credential_tags:
+        for subtag in confidential_tags:
             if subtag in data["DataClasses"]:
                 data["KIT_NOTIFICATION"] = True
                 break
@@ -284,11 +284,23 @@ def main(quiet:bool=False, force:bool=False, directory:str="/tmp/data",
     setup_logging()
     logging.basicConfig(level="INFO")
 
+    try:
+        with open(f"{base_directory}/tags-PII.txt", "r") as pii_fh:
+            user_info_tags.extend([pii.strip().lower() for pii in pii_fh.readlines() if pii.strip()])
+    except:
+        print("Failed to open file")
+    try:
+        with open(f"{base_directory}/tags-confidential_data.txt", "r") as ci_fh:
+            confidential_tags.extend([cd.strip().lower() for cd in ci_fh.readlines() if cd.strip()])
+    except:
+        print("Failed to open file")
+
+
     if not filtered_domains:
         filtered_domains = []
     else:
         filtered_domains = [domain.lower().strip() for domain in filtered_domains.split(",")]
-    logger.info(f"Filter applied: {','.join(filtered_domains)}")
+        logger.info(f"Filter applied: {', '.join(filtered_domains)}")
 
     try:
         key = getenv("HIBP_KEY") if not hibp_key else hibp_key
