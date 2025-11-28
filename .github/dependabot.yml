@@ -9,7 +9,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    version-strategy: "increase"
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
